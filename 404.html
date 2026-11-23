@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sovereign Web4 dApp Portal | Martin Luther (@elon00)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --card-bg: rgba(16, 24, 40, 0.85);
+      --border: rgba(0, 255, 204, 0.25);
+      --cyan: #00ffcc;
+      --purple: #9d4edd;
+      --gold: #ffb703;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', sans-serif;
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+    .grid-bg {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-image: linear-gradient(rgba(0, 255, 204, 0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(0, 255, 204, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px; z-index: -1; pointer-events: none;
+    }
+    header {
+      padding: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .brand h1 {
+      font-size: 1.5rem;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .btn {
+      padding: 8px 16px;
+      background: rgba(0, 255, 204, 0.1);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 6px;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .btn:hover {
+      background: var(--cyan); color: var(--bg);
+      box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+    }
+    .btn-secondary {
+      border-color: var(--purple); color: var(--purple); background: rgba(157, 78, 221, 0.1);
+    }
+    .btn-secondary:hover { background: var(--purple); color: #fff; }
+    main { max-width: 1200px; margin: 30px auto; padding: 0 24px; }
+    .hero {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 32px;
+      margin-bottom: 30px;
+      backdrop-filter: blur(10px);
+    }
+    .badge-bar { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .tag {
+      font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 4px;
+      text-transform: uppercase;
+    }
+    .tag-cyan { background: rgba(0, 255, 204, 0.15); color: var(--cyan); }
+    .tag-purple { background: rgba(157, 78, 221, 0.2); color: var(--purple); }
+    .tag-gold { background: rgba(255, 183, 3, 0.15); color: var(--gold); }
+    .repo-title { font-size: 2.2rem; font-weight: 700; color: #fff; margin-bottom: 10px; }
+    .repo-desc { font-size: 1.1rem; color: var(--muted); margin-bottom: 24px; max-width: 900px; }
+    .action-row { display: flex; gap: 12px; flex-wrap: wrap; }
+    
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+      gap: 24px;
+      margin-bottom: 30px;
+    }
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+    }
+    .panel h2 { font-size: 1.25rem; color: #fff; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+    .input-group { margin-bottom: 14px; }
+    .input-group label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 6px; }
+    .input-group input, .input-group select {
+      width: 100%; padding: 10px 14px;
+      background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 6px; color: #fff; font-family: 'JetBrains Mono', monospace;
+    }
+    #qrcode-container {
+      display: flex; justify-content: center; align-items: center;
+      padding: 16px; background: #fff; border-radius: 8px; width: 180px; height: 180px;
+      margin: 16px auto;
+    }
+    canvas#conway-canvas {
+      width: 100%; height: 160px; background: rgba(0,0,0,0.5);
+      border-radius: 8px; border: 1px solid rgba(0, 255, 204, 0.15); display: block;
+    }
+    .readme-panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 32px;
+      margin-top: 30px;
+    }
+    .readme-panel h2 { color: var(--cyan); margin-bottom: 20px; font-size: 1.4rem; }
+    .markdown-body {
+      color: #cbd5e1;
+      font-size: 0.95rem;
+      line-height: 1.8;
+      overflow-wrap: break-word;
+    }
+    .markdown-body h1, .markdown-body h2, .markdown-body h3 { color: #fff; margin: 20px 0 10px; }
+    .markdown-body pre { background: rgba(0,0,0,0.6); padding: 16px; border-radius: 8px; overflow-x: auto; margin: 16px 0; }
+    .markdown-body code { font-family: 'JetBrains Mono', monospace; color: var(--cyan); }
+    .markdown-body a { color: var(--cyan); }
+    footer { text-align: center; color: var(--muted); padding: 40px 24px; font-size: 0.85rem; }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+
+  <header>
+    <div class="brand">
+      <h1>⚡ Martin Luther <span style="font-size:0.9rem; opacity:0.7">(@elon00)</span></h1>
+    </div>
+    <div style="display:flex; gap:10px; align-items:center;">
+      <button id="connectWalletBtn" class="btn" onclick="connectWallet()">🦊 Connect Wallet</button>
+      <a href="https://elon00.github.io/" class="btn btn-secondary">🌐 Master Portal</a>
+      <a id="githubRepoLink" href="https://github.com/elon00" target="_blank" class="btn">🐙 GitHub Repo</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="hero">
+      <div class="badge-bar">
+        <span class="tag tag-cyan" id="badgeVisibility">SOVEREIGN NON-FORK DAPP</span>
+        <span class="tag tag-purple">NIST FIPS 204 (ML-DSA)</span>
+        <span class="tag tag-gold">REALITY-FIRST EVIDENCE GATED</span>
+      </div>
+      <h1 class="repo-title" id="repoName">Loading dApp...</h1>
+      <p class="repo-desc" id="repoDesc">Connecting to decentralized repository state and synchronizing Web4 metadata...</p>
+      <div class="action-row">
+        <a id="primaryActionBtn" href="#" target="_blank" class="btn">🚀 Inspect Source Code</a>
+        <button class="btn btn-secondary" onclick="document.getElementById('readmeSec').scrollIntoView({behavior:'smooth'})">📖 Architecture Specs</button>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <!-- Payment & Interaction Panel -->
+      <div class="panel">
+        <h2>📱 Dynamic Payment QR (EIP-681)</h2>
+        <div class="input-group">
+          <label>Target Project Treasury / Verified Address</label>
+          <input type="text" id="qrRecipient" value="0x02379E62715387bF9ff86803731C6e5a899E375c">
+        </div>
+        <div class="input-group">
+          <label>Network & Amount</label>
+          <div style="display:flex; gap:10px;">
+            <select id="qrNetwork" style="width:55%;">
+              <option value="421614">Arbitrum Sepolia (421614)</option>
+              <option value="11155111">Ethereum Sepolia (11155111)</option>
+            </select>
+            <input type="number" id="qrAmount" value="0.05" step="0.01" style="width:45%;">
+          </div>
+        </div>
+        <button class="btn" style="width:100%; justify-content:center;" onclick="updateQrCode()">⚡ Update Dynamic QR</button>
+        <div id="qrcode-container">
+          <div id="qrcode"></div>
+        </div>
+        <p style="text-align:center; font-size:0.75rem; color:var(--muted)">Scan with any Web3 mobile wallet (MetaMask, Coinbase, Rainbow)</p>
+      </div>
+
+      <!-- Cellular Swarm Consensus Engine -->
+      <div class="panel">
+        <h2>🧬 Conway Automaton Swarm Engine</h2>
+        <p style="font-size:0.85rem; color:var(--muted); margin-bottom:12px;">
+          Deterministic cellular state evolution modeling decentralized agent consensus entropy.
+        </p>
+        <canvas id="conway-canvas" width="300" height="160"></canvas>
+        <div style="display:flex; justify-content:space-between; margin-top:12px; font-size:0.85rem;" class="mono">
+          <span>Swarm Entropy: <span id="conwayEntropy" style="color:var(--cyan)">0.268</span></span>
+          <span>Gen: <span id="conwayGen" style="color:var(--gold)">0</span></span>
+          <button class="btn" style="padding:2px 8px; font-size:0.75rem;" onclick="resetConway()">Re-Seed</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live README Panel -->
+    <div class="readme-panel" id="readmeSec">
+      <h2>📜 Verified Project Specifications & Architecture</h2>
+      <div id="readmeContent" class="markdown-body">
+        <p>Loading project documentation directly from GitHub...</p>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2026 Martin Luther (<a href="https://github.com/elon00" style="color:var(--cyan)">@elon00</a>). Reality-First Sovereign Architecture.</p>
+  </footer>
+
+  <script>
+    // Extract Repo Name from URL Path
+    const pathParts = window.location.pathname.split('/').filter(p => p.length > 0);
+    const repoName = (pathParts.length > 0 && pathParts[0] !== '404.html') ? pathParts[0] : 'zimbabwe-sovereign-ai';
+
+    async function loadRepoData() {
+      document.title = `${repoName} | Martin Luther (@elon00) Sovereign dApp`;
+      document.getElementById('repoName').textContent = repoName;
+      document.getElementById('githubRepoLink').href = `https://github.com/elon00/${repoName}`;
+      document.getElementById('primaryActionBtn').href = `https://github.com/elon00/${repoName}`;
+
+      try {
+        const repoRes = await fetch(`https://api.github.com/repos/elon00/${repoName}`);
+        if (repoRes.ok) {
+          const data = await repoRes.json();
+          document.getElementById('repoDesc').textContent = data.description || 'Sovereign Web4 protocol and decentralized application module authored by Martin Luther (@elon00).';
+        } else {
+          document.getElementById('repoDesc').textContent = `Sovereign Web4 repository (${repoName}) in Martin Luther's portfolio.`;
+        }
+      } catch (e) {
+        console.warn('Could not fetch repo metadata', e);
+      }
+
+      // Fetch README
+      try {
+        const readmeRes = await fetch(`https://raw.githubusercontent.com/elon00/${repoName}/main/README.md`);
+        if (readmeRes.ok) {
+          const markdown = await readmeRes.text();
+          document.getElementById('readmeContent').innerHTML = marked.parse(markdown);
+        } else {
+          document.getElementById('readmeContent').innerHTML = `<p>Sovereign documentation available on <a href="https://github.com/elon00/${repoName}" target="_blank">GitHub Repository</a>.</p>`;
+        }
+      } catch (err) {
+        document.getElementById('readmeContent').innerHTML = `<p>Visit repository on <a href="https://github.com/elon00/${repoName}" target="_blank">GitHub</a>.</p>`;
+      }
+    }
+
+    // Web3 Wallet Connection
+    async function connectWallet() {
+      const btn = document.getElementById('connectWalletBtn');
+      if (typeof window.ethereum !== 'undefined') {
+        try {
+          btn.textContent = '⏳ Connecting...';
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          const account = accounts[0];
+          const shortAcc = account.slice(0, 6) + '...' + account.slice(-4);
+          btn.textContent = '🟢 ' + shortAcc;
+          document.getElementById('qrRecipient').value = account;
+          updateQrCode();
+        } catch (e) {
+          btn.textContent = '🦊 Connect Wallet';
+          alert('Wallet request rejected: ' + (e.message || e));
+        }
+      } else {
+        alert('No Web3 wallet detected. Please install MetaMask, Coinbase Wallet, or Phantom.');
+      }
+    }
+
+    // Dynamic QR Generator
+    let qrcodeObj = null;
+    function updateQrCode() {
+      const recipient = document.getElementById('qrRecipient').value.trim() || '0x02379E62715387bF9ff86803731C6e5a899E375c';
+      const chainId = document.getElementById('qrNetwork').value;
+      const amount = document.getElementById('qrAmount').value || '0.01';
+      let wei = '10000000000000000';
+      try { wei = ethers.parseEther(amount.toString()).toString(); } catch {}
+      const eip681 = `ethereum:${recipient}@${chainId}?value=${wei}`;
+      
+      const qrContainer = document.getElementById('qrcode');
+      qrContainer.innerHTML = '';
+      qrcodeObj = new QRCode(qrContainer, {
+        text: eip681,
+        width: 160,
+        height: 160,
+        colorDark: '#0a0e17',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    // Conway Automaton Engine
+    const canvas = document.getElementById('conway-canvas');
+    const ctx = canvas.getContext('2d');
+    const rows = 30, cols = 60;
+    let grid = Array.from({ length: rows }, () => Array(cols).fill(0));
+    let generation = 0;
+
+    function resetConway() {
+      generation = 0;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          grid[r][c] = Math.random() < 0.25 ? 1 : 0;
+        }
+      }
+    }
+
+    function stepConway() {
+      const next = Array.from({ length: rows }, () => Array(cols).fill(0));
+      let aliveCount = 0;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          let neighbors = 0;
+          for (let dr of [-1, 0, 1]) {
+            for (let dc of [-1, 0, 1]) {
+              if (dr === 0 && dc === 0) continue;
+              const nr = (r + dr + rows) % rows;
+              const nc = (c + dc + cols) % cols;
+              neighbors += grid[nr][nc];
+            }
+          }
+          if (grid[r][c] === 1) {
+            next[r][c] = (neighbors === 2 || neighbors === 3) ? 1 : 0;
+          } else {
+            next[r][c] = (neighbors === 3) ? 1 : 0;
+          }
+          if (next[r][c] === 1) aliveCount++;
+        }
+      }
+      grid = next;
+      generation++;
+      document.getElementById('conwayGen').textContent = generation;
+      document.getElementById('conwayEntropy').textContent = (aliveCount / (rows * cols)).toFixed(3);
+      drawConway();
+    }
+
+    function drawConway() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const cellW = canvas.width / cols;
+      const cellH = canvas.height / rows;
+      ctx.fillStyle = '#00ffcc';
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (grid[r][c] === 1) {
+            ctx.fillRect(c * cellW, r * cellH, cellW - 0.5, cellH - 0.5);
+          }
+        }
+      }
+    }
+
+    window.onload = () => {
+      loadRepoData();
+      updateQrCode();
+      resetConway();
+      setInterval(stepConway, 180);
+    };
+  </script>
+</body>
+</html>
