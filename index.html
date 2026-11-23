@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Martin Luther (@elon00) | Sovereign Web4 & Multi-Chain dApp Portal</title>
+  <meta name="description" content="Universal Web4, Crypto, Post-Quantum AI & Blockchain Fleet Directory for Martin Luther (elon00) — 3,828 Sovereign Repositories.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.2/ethers.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    :root {
+      --bg: #0a0e17;
+      --card-bg: rgba(16, 24, 40, 0.75);
+      --border: rgba(0, 255, 204, 0.25);
+      --cyan: #00ffcc;
+      --purple: #9d4edd;
+      --gold: #ffb703;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+      line-height: 1.6;
+    }
+    .grid-bg {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background-image: linear-gradient(rgba(0, 255, 204, 0.03) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(0, 255, 204, 0.03) 1px, transparent 1px);
+      background-size: 40px 40px; z-index: -1; pointer-events: none;
+    }
+    header {
+      padding: 40px 24px 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .brand h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--cyan), var(--purple));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand p { color: var(--muted); font-size: 0.95rem; margin-top: 4px; }
+    .wallet-bar { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .btn {
+      padding: 10px 18px;
+      background: rgba(0, 255, 204, 0.1);
+      border: 1px solid var(--cyan);
+      color: var(--cyan);
+      border-radius: 8px;
+      font-family: 'Space Grotesk', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn:hover {
+      background: var(--cyan);
+      color: var(--bg);
+      box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+    }
+    .btn-secondary {
+      border-color: var(--purple);
+      color: var(--purple);
+      background: rgba(157, 78, 221, 0.1);
+    }
+    .btn-secondary:hover {
+      background: var(--purple);
+      color: #fff;
+      box-shadow: 0 0 15px rgba(157, 78, 221, 0.4);
+    }
+    main { max-width: 1200px; margin: 30px auto; padding: 0 24px; }
+    .hero-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      backdrop-filter: blur(10px);
+    }
+    .stat-label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    .stat-val { font-size: 1.8rem; font-weight: 700; color: var(--cyan); margin-top: 6px; font-family: 'JetBrains Mono', monospace; }
+    
+    .interactive-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+    .panel {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 24px;
+      backdrop-filter: blur(10px);
+    }
+    .panel h2 {
+      font-size: 1.25rem;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #fff;
+    }
+    .input-group { margin-bottom: 14px; }
+    .input-group label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 6px; }
+    .input-group input, .input-group select {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      color: #fff;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+    }
+    .input-group input:focus { outline: none; border-color: var(--cyan); }
+    #qrcode-container {
+      display: flex; justify-content: center; align-items: center;
+      padding: 16px; background: #fff; border-radius: 8px; width: 190px; height: 190px;
+      margin: 16px auto;
+    }
+    canvas#conway-canvas {
+      width: 100%; height: 180px; background: rgba(0,0,0,0.5);
+      border-radius: 8px; border: 1px solid rgba(0, 255, 204, 0.15);
+      display: block;
+    }
+    .portfolio-section { margin-top: 40px; }
+    .section-header {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 16px; margin-bottom: 20px;
+    }
+    .search-box {
+      padding: 10px 16px;
+      width: 280px;
+      background: rgba(0, 0, 0, 0.5);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: #fff;
+      font-family: 'Space Grotesk', sans-serif;
+    }
+    .dapp-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+    .dapp-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .dapp-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--cyan);
+    }
+    .tag {
+      font-size: 0.7rem; font-weight: 700; padding: 4px 8px; border-radius: 4px;
+      text-transform: uppercase; display: inline-block; margin-bottom: 10px;
+    }
+    .tag-evm { background: rgba(0, 255, 204, 0.15); color: var(--cyan); }
+    .tag-pqc { background: rgba(157, 78, 221, 0.2); color: var(--purple); }
+    .tag-svm { background: rgba(255, 183, 3, 0.15); color: var(--gold); }
+    .tag-ai { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .dapp-title { font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    .dapp-desc { font-size: 0.85rem; color: var(--muted); margin-bottom: 16px; flex-grow: 1; }
+    footer {
+      max-width: 1200px; margin: 60px auto 30px; padding: 24px;
+      text-align: center; color: var(--muted); font-size: 0.85rem;
+      border-top: 1px solid var(--border);
+    }
+    .mono { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body>
+  <div class="grid-bg"></div>
+
+  <header>
+    <div class="brand">
+      <h1>⚡ Martin Luther <span style="font-size:1rem; opacity:0.7">(@elon00)</span></h1>
+      <p>Universal Web4 Sovereign Ecosystem · AI · Crypto · Quantum · Algorithmic Architecture</p>
+    </div>
+    <div class="wallet-bar">
+      <button id="connectWalletBtn" class="btn" onclick="connectWallet()">🦊 Connect Wallet</button>
+      <a href="https://github.com/elon00" target="_blank" class="btn btn-secondary">🐙 GitHub Fleet</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="hero-stats">
+      <div class="stat-card">
+        <div class="stat-label">Total Repositories</div>
+        <div class="stat-val">3,828</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Hand-Made (Non-Fork)</div>
+        <div class="stat-val">3,263</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Architecture Batches</div>
+        <div class="stat-val">121</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Reality Gate Score</div>
+        <div class="stat-val" style="color:#00ffcc">100 / 100</div>
+      </div>
+    </div>
+
+    <div class="interactive-grid">
+      <!-- Panel 1: Multi-Wallet & Dynamic Payment QR -->
+      <div class="panel">
+        <h2>📱 Dynamic Payment QR (EIP-681)</h2>
+        <div class="input-group">
+          <label>Recipient Address / ENS</label>
+          <input type="text" id="qrRecipient" value="0x02379E62715387bF9ff86803731C6e5a899E375c">
+        </div>
+        <div class="input-group">
+          <label>Network & Token Amount</label>
+          <div style="display:flex; gap:10px;">
+            <select id="qrNetwork" style="width:50%;">
+              <option value="421614">Arbitrum Sepolia (421614)</option>
+              <option value="11155111">Ethereum Sepolia (11155111)</option>
+            </select>
+            <input type="number" id="qrAmount" value="0.05" step="0.01" style="width:50%;">
+          </div>
+        </div>
+        <button class="btn" style="width:100%" onclick="updateQrCode()">⚡ Generate Web4 Payment QR</button>
+        <div id="qrcode-container">
+          <div id="qrcode"></div>
+        </div>
+        <p style="text-align:center; font-size:0.75rem; color:var(--muted)">Scan with MetaMask, Coinbase, or Phantom Mobile</p>
+      </div>
+
+      <!-- Panel 2: Conway Automaton Swarm Consensus Engine -->
+      <div class="panel">
+        <h2>🧬 Conway Automaton Consensus Engine</h2>
+        <p style="font-size:0.85rem; color:var(--muted); margin-bottom:12px;">
+          Deterministic cellular automata modeling decentralized agent swarm state evolution and entropy.
+        </p>
+        <canvas id="conway-canvas" width="300" height="150"></canvas>
+        <div style="display:flex; justify-content:space-between; margin-top:12px; font-size:0.85rem;" class="mono">
+          <span>Entropy: <span id="conwayEntropy" style="color:var(--cyan)">0.284</span></span>
+          <span>Gen: <span id="conwayGen" style="color:var(--gold)">0</span></span>
+          <button class="btn" style="padding:4px 10px; font-size:0.75rem;" onclick="resetConway()">Seed Random</button>
+        </div>
+      </div>
+
+      <!-- Panel 3: Post-Quantum Cryptography & x402 Bazaar Protocol -->
+      <div class="panel">
+        <h2>🛡️ Post-Quantum Security & x402 Bazaar</h2>
+        <div class="input-group">
+          <label>PQC Protocol Standard</label>
+          <input type="text" readonly value="NIST FIPS 204 (ML-DSA) / FIPS 203 (ML-KEM)" class="mono">
+        </div>
+        <div class="input-group">
+          <label>x402 Bazaar Machine-to-Machine Gateway</label>
+          <input type="text" readonly value="HTTP 402 Payment Required · QuickNode Gas Failover" class="mono">
+        </div>
+        <div style="background:rgba(0,0,0,0.4); padding:12px; border-radius:8px; font-size:0.8rem; border-left:3px solid var(--purple)">
+          <div style="color:var(--purple); font-weight:700">Verified On-Chain Testnet Addresses:</div>
+          <div class="mono" style="margin-top:4px; word-break:break-all;">Arbitrum Sepolia: <a href="https://sepolia.arbiscan.io/address/0x1787F3d2F1BfF32C05EC1E0a6043669D7224d387" target="_blank" style="color:var(--cyan)">0x1787F3d...224d387</a></div>
+          <div class="mono" style="margin-top:2px; word-break:break-all;">Ethereum Sepolia: <a href="https://sepolia.etherscan.io/address/0x02379E62715387bF9ff86803731C6e5a899E375c" target="_blank" style="color:var(--cyan)">0x02379E6...9E375c</a></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DApp Catalog Grid -->
+    <div class="portfolio-section">
+      <div class="section-header">
+        <h2>🚀 Featured Sovereign dApps & Flagship Nodes</h2>
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search dApps or Repos..." oninput="filterDapps()">
+      </div>
+
+      <div class="dapp-cards" id="dappGrid">
+        <!-- Card 1 -->
+        <div class="dapp-card" data-title="qarbi arbitrum evm agent">
+          <div>
+            <span class="tag tag-evm">Arbitrum Nitro / EVM</span>
+            <div class="dapp-title">QARBI Platform</div>
+            <div class="dapp-desc">Agent-native Web4 platform for autonomous AI agents with identity, reputation, permissions, and economic agency on Arbitrum.</div>
+          </div>
+          <a href="https://qarbi.netlify.app/" target="_blank" class="btn" style="width:100%; justify-content:center;">🌐 Launch dApp</a>
+        </div>
+
+        <!-- Card 2 -->
+        <div class="dapp-card" data-title="zimbabwe sovereign ai token sepolia">
+          <div>
+            <span class="tag tag-pqc">Ethereum Sepolia + PQC</span>
+            <div class="dapp-title">Zimbabwe Sovereign AI</div>
+            <div class="dapp-desc">Sovereign multi-model AI prototype featuring Conway consensus, NIST FIPS 204 PQC layer, and token transfer dApp.</div>
+          </div>
+          <a href="https://elon00.github.io/zimbabwe-sovereign-ai/" target="_blank" class="btn" style="width:100%; justify-content:center;">🌐 Launch dApp</a>
+        </div>
+
+        <!-- Card 3 -->
+        <div class="dapp-card" data-title="shor x402 algorand quantum pqc">
+          <div>
+            <span class="tag tag-pqc">Algorand AVM + PQC</span>
+            <div class="dapp-title">shor-x402 Protocol</div>
+            <div class="dapp-desc">Algorand ARC-0032 smart contract node coupled with post-quantum lattice cryptography defense against Shor's algorithm.</div>
+          </div>
+          <a href="https://github.com/elon00/shor-x402" target="_blank" class="btn btn-secondary" style="width:100%; justify-content:center;">🐙 View Node</a>
+        </div>
+
+        <!-- Card 4 -->
+        <div class="dapp-card" data-title="solana ai anchor svm">
+          <div>
+            <span class="tag tag-svm">Solana SVM Anchor</span>
+            <div class="dapp-title">Solana AI Anchor Hub</div>
+            <div class="dapp-desc">High-throughput Solana on-chain AI agent program written in Rust Anchor with micro-payment pipelines.</div>
+          </div>
+          <a href="https://github.com/elon00/solana-ai" target="_blank" class="btn btn-secondary" style="width:100%; justify-content:center;">🐙 View Program</a>
+        </div>
+
+        <!-- Card 5 -->
+        <div class="dapp-card" data-title="qmoosa universal framework web4 blockchain">
+          <div>
+            <span class="tag tag-ai">Flagship Framework</span>
+            <div class="dapp-title">QMOOSA Engineering Framework</div>
+            <div class="dapp-desc">The universal master AI Web4 blockchain engineering framework governing all 11 architecture domains and 121 batches.</div>
+          </div>
+          <a href="https://github.com/elon00/QMOOSA-Universal-AI-Web4-Blockchain-Engineering-Framework" target="_blank" class="btn btn-secondary" style="width:100%; justify-content:center;">🐙 Explore Framework</a>
+        </div>
+
+        <!-- Card 6 -->
+        <div class="dapp-card" data-title="qmoosa 1000 technical security guard portfolio">
+          <div>
+            <span class="tag tag-ai">Portfolio Security</span>
+            <div class="dapp-title">qmoosa-1000 Security Guard</div>
+            <div class="dapp-desc">Pinned cryptographic credential security guard and deterministic validation tools protecting 3,828 repositories.</div>
+          </div>
+          <a href="https://github.com/elon00/qmoosa-1000" target="_blank" class="btn btn-secondary" style="width:100%; justify-content:center;">🐙 View Security Core</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2026 Martin Luther (<a href="https://github.com/elon00" style="color:var(--cyan); text-decoration:none">@elon00</a>). Reality-First Sovereign Engineering.</p>
+    <p style="margin-top:6px; font-size:0.75rem;">Multi-Chain Fleet Status: <span style="color:var(--cyan)">EVIDENCE_GATED</span> · Mainnet Protection: <span style="color:var(--gold)">STRICTLY_LOCKED</span></p>
+  </footer>
+
+  <script>
+    // 1. Dynamic Web3 Multi-Wallet Connection
+    async function connectWallet() {
+      const btn = document.getElementById('connectWalletBtn');
+      if (typeof window.ethereum !== 'undefined') {
+        try {
+          btn.textContent = '⏳ Connecting...';
+          const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          const account = accounts[0];
+          const shortAcc = account.slice(0, 6) + '...' + account.slice(-4);
+          btn.textContent = '🟢 ' + shortAcc;
+          document.getElementById('qrRecipient').value = account;
+          updateQrCode();
+        } catch (e) {
+          btn.textContent = '🦊 Connect Wallet';
+          alert('Wallet connection rejected: ' + (e.message || e));
+        }
+      } else {
+        alert('No Web3 wallet detected. Please install MetaMask, Coinbase Wallet, or Phantom.');
+      }
+    }
+
+    // 2. Dynamic Payment QR Code Generator (EIP-681)
+    let qrcodeObj = null;
+    function updateQrCode() {
+      const recipient = document.getElementById('qrRecipient').value.trim() || '0x0000000000000000000000000000000000000000';
+      const chainId = document.getElementById('qrNetwork').value;
+      const amount = document.getElementById('qrAmount').value || '0.01';
+      
+      // Calculate Wei
+      let wei = '0';
+      try {
+        wei = ethers.parseEther(amount.toString()).toString();
+      } catch {
+        wei = '10000000000000000';
+      }
+      
+      const eip681 = `ethereum:${recipient}@${chainId}?value=${wei}`;
+      
+      const qrContainer = document.getElementById('qrcode');
+      qrContainer.innerHTML = '';
+      qrcodeObj = new QRCode(qrContainer, {
+        text: eip681,
+        width: 170,
+        height: 170,
+        colorDark: '#0a0e17',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    // 3. Conway Automaton Swarm Consensus Engine
+    const canvas = document.getElementById('conway-canvas');
+    const ctx = canvas.getContext('2d');
+    const rows = 30, cols = 60;
+    let grid = Array.from({ length: rows }, () => Array(cols).fill(0));
+    let generation = 0;
+
+    function resetConway() {
+      generation = 0;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          grid[r][c] = Math.random() < 0.25 ? 1 : 0;
+        }
+      }
+    }
+
+    function stepConway() {
+      const next = Array.from({ length: rows }, () => Array(cols).fill(0));
+      let aliveCount = 0;
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          let neighbors = 0;
+          for (let dr of [-1, 0, 1]) {
+            for (let dc of [-1, 0, 1]) {
+              if (dr === 0 && dc === 0) continue;
+              const nr = (r + dr + rows) % rows;
+              const nc = (c + dc + cols) % cols;
+              neighbors += grid[nr][nc];
+            }
+          }
+          if (grid[r][c] === 1) {
+            next[r][c] = (neighbors === 2 || neighbors === 3) ? 1 : 0;
+          } else {
+            next[r][c] = (neighbors === 3) ? 1 : 0;
+          }
+          if (next[r][c] === 1) aliveCount++;
+        }
+      }
+      grid = next;
+      generation++;
+      document.getElementById('conwayGen').textContent = generation;
+      document.getElementById('conwayEntropy').textContent = (aliveCount / (rows * cols)).toFixed(3);
+      drawConway();
+    }
+
+    function drawConway() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const cellW = canvas.width / cols;
+      const cellH = canvas.height / rows;
+      ctx.fillStyle = '#00ffcc';
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          if (grid[r][c] === 1) {
+            ctx.fillRect(c * cellW, r * cellH, cellW - 0.5, cellH - 0.5);
+          }
+        }
+      }
+    }
+
+    // 4. Portfolio Live Filter
+    function filterDapps() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const cards = document.querySelectorAll('.dapp-card');
+      cards.forEach(card => {
+        const title = card.getAttribute('data-title') || '';
+        const text = card.innerText.toLowerCase();
+        if (title.includes(q) || text.includes(q)) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+
+    // Initialize on load
+    window.onload = () => {
+      updateQrCode();
+      resetConway();
+      setInterval(stepConway, 180);
+    };
+  </script>
+</body>
+</html>
